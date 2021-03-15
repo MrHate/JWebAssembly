@@ -628,7 +628,9 @@ public class BinaryModuleWriter extends ModuleWriter implements InstructionOpcod
             if( function.paramNames == null ) {
                 function.paramNames = new ArrayList<>();
             }
-            function.paramNames.add( name );
+            if( !(name == "this") || function.paramNames.size() == 0){
+                function.paramNames.add( name );
+            }
         }
     }
 

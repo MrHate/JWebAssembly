@@ -79,6 +79,8 @@ public class ModuleGenerator {
 
     private final CodeOptimizer             optimizer;
 
+
+
     /**
      * Create a new generator.
      * 
@@ -469,9 +471,9 @@ public class ModuleGenerator {
                 return;
             }
             if( (annotationValues = method.getAnnotation( JWebAssembly.EXPORT_ANNOTATION )) != null ) {
-                if( !method.isStatic() ) {
-                    throw new WasmException( "Export method must be static: " + name.fullName, -1 );
-                }
+                // if( !method.isStatic() ) {
+                //     throw new WasmException( "Export method must be static: " + name.fullName, -1 );
+                // }
                 functions.markAsNeeded( name );
                 return;
             }
