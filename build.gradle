@@ -132,7 +132,7 @@ publishing {
         JWebAssemblyPublication(MavenPublication) {
             from components.java
             artifact sourcesJar
-            artifact javadocJar
+            // artifact javadocJar
             artifactId archivesBaseName
             pom.withXml {
                 def root = asNode()
