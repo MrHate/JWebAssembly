@@ -29,6 +29,8 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import jwbind.ClassDesc;
+
 import de.inetsoftware.jwebassembly.WasmException;
 import de.inetsoftware.jwebassembly.module.FunctionName;
 import de.inetsoftware.jwebassembly.module.ModuleWriter;
@@ -101,6 +103,8 @@ public class BinaryModuleWriter extends ModuleWriter implements InstructionOpcod
 
     private StructType                  classType;
 
+    private ClassDesc                   desc;
+
     /**
      * Create new instance.
      * 
@@ -141,6 +145,7 @@ public class BinaryModuleWriter extends ModuleWriter implements InstructionOpcod
         writeDataSection();
         writeDebugNames();
         writeSourceMappingUrl();
+        writeJwbindDescription();
         writeProducersSection();
 
         wasm.close();
@@ -1496,5 +1501,31 @@ public class BinaryModuleWriter extends ModuleWriter implements InstructionOpcod
         codeStream.writeOpCode( op );
         codeStream.write( alignment ); // 0: 8 Bit; 1: 16 Bit; 2: 32 Bit of the resulting offset
         codeStream.writeVaruint32( offset );
+    }
+
+    // ===================================================================================
+
+    public void prepareJwbindDescription( ClassDesc desc ) {
+        this.desc = desc;
+    }
+
+    private void writeJwbindDescription() throws IOException {
+        if( desc == null ){
+            return;
+        }
+
+        WasmOutputStream section = new WasmOutputStream( options );
+        section.writeString("SaNA");
+        section.writeVaruint32(desc.attributes.size());
+        section.writeVaruint32(desc.methods.size());
+        section.writeString(desc.className);
+        for(String attr : desc.attributes){
+            section.writeString(attr);
+        }
+        for(String m : desc.methods){
+            section.writeString(m);
+        }
+
+        wasm.writeSection(SectionType.Custom, section);
     }
 }

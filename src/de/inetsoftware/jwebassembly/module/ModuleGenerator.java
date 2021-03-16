@@ -34,10 +34,13 @@ import java.util.zip.ZipInputStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import jwbind.ClassDesc;
+
 import de.inetsoftware.classparser.ClassFile;
 import de.inetsoftware.classparser.Code;
 import de.inetsoftware.classparser.ConstantClass;
 import de.inetsoftware.classparser.MethodInfo;
+import de.inetsoftware.jwebassembly.binary.BinaryModuleWriter;
 import de.inetsoftware.jwebassembly.JWebAssembly;
 import de.inetsoftware.jwebassembly.WasmException;
 import de.inetsoftware.jwebassembly.javascript.JavaScriptWriter;
@@ -79,6 +82,7 @@ public class ModuleGenerator {
 
     private final CodeOptimizer             optimizer;
 
+    private final ClassDesc                 jwbindDesc;
 
 
     /**
@@ -97,6 +101,7 @@ public class ModuleGenerator {
         this.writer = writer;
         this.javaScript = new JavaScriptWriter( target );
         this.classFileLoader = new ClassFileLoader( new URLClassLoader( libraries.toArray( new URL[libraries.size()] ) ) );
+        this.jwbindDesc = new ClassDesc();
         WasmOptions options = writer.options;
         functions = options.functions;
         types = options.types;
@@ -312,6 +317,8 @@ public class ModuleGenerator {
         for( Iterator<FunctionName> iterator = functions.getWriteLater(); iterator.hasNext(); ) {
             FunctionName name = iterator.next();
             writeMethodSignature( name, FunctionType.Code, null );
+            jwbindDesc.className = name.className;
+            jwbindDesc.methods.add(name.methodName + name.signature);
         }
 
         // register types of abstract and interface methods
@@ -327,6 +334,7 @@ public class ModuleGenerator {
         types.prepareFinish( writer, classFileLoader );
         functions.prepareFinish();
         strings.prepareFinish( writer );
+        prepareJwbindDescription();
         writer.prepareFinish();
     }
 
@@ -688,4 +696,11 @@ public class ModuleGenerator {
         writer.writeMethodParamFinish( name );
     }
 
+
+    private void prepareJwbindDescription() {
+        if(writer instanceof BinaryModuleWriter) {
+            BinaryModuleWriter bmw = (BinaryModuleWriter)writer;
+            bmw.prepareJwbindDescription(jwbindDesc);
+        }
+    }
 }
