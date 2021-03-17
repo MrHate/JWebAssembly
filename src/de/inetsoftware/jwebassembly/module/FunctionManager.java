@@ -42,6 +42,8 @@ class FunctionManager {
 
     private final Set<String>                      usedClasses = new LinkedHashSet<>();
 
+    private final Set<String>                      staticMethods = new LinkedHashSet<>();
+
     private boolean isFinish;
 
     /**
@@ -473,4 +475,13 @@ class FunctionManager {
     private static enum State {
         None, Needed, Scanned, Written, Abstract;
     }
+
+    public void markAsStatic( @Nonnull FunctionName name ) {
+      staticMethods.add(name.fullName);
+    }
+
+    public boolean isStatic( @Nonnull FunctionName name ) {
+      return staticMethods.contains(name.fullName);
+    }
+
 }

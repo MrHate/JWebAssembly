@@ -318,7 +318,11 @@ public class ModuleGenerator {
             FunctionName name = iterator.next();
             writeMethodSignature( name, FunctionType.Code, null );
             jwbindDesc.className = name.className;
-            jwbindDesc.methods.add(name.methodName + name.signature);
+            String ent = name.methodName + name.signature;
+            if(functions.isStatic(name)){
+              ent += "+";
+            }
+            jwbindDesc.methods.add(ent);
         }
 
         // register types of abstract and interface methods
@@ -479,9 +483,10 @@ public class ModuleGenerator {
                 return;
             }
             if( (annotationValues = method.getAnnotation( JWebAssembly.EXPORT_ANNOTATION )) != null ) {
-                // if( !method.isStatic() ) {
-                //     throw new WasmException( "Export method must be static: " + name.fullName, -1 );
-                // }
+                if( !method.isStatic() ) {
+                    functions.markAsStatic( name );
+                    // throw new WasmException( "Export method must be static: " + name.fullName, -1 );
+                }
                 functions.markAsNeeded( name );
                 return;
             }
