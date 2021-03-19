@@ -483,7 +483,7 @@ public class ModuleGenerator {
                 return;
             }
             if( (annotationValues = method.getAnnotation( JWebAssembly.EXPORT_ANNOTATION )) != null ) {
-                if( !method.isStatic() ) {
+                if( method.isStatic() ) {
                     functions.markAsStatic( name );
                     // throw new WasmException( "Export method must be static: " + name.fullName, -1 );
                 }
