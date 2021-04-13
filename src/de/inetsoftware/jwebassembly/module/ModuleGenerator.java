@@ -483,11 +483,20 @@ public class ModuleGenerator {
                 return;
             }
             if( (annotationValues = method.getAnnotation( JWebAssembly.EXPORT_ANNOTATION )) != null ) {
-                if( method.isStatic() ) {
-                    functions.markAsStatic( name );
-                    // throw new WasmException( "Export method must be static: " + name.fullName, -1 );
+                if( !method.isStatic() ) {
+                    // functions.markAsStatic( name );
+                    throw new WasmException( "Export method must be static: " + name.fullName, -1 );
                 }
                 functions.markAsNeeded( name );
+                return;
+            }
+            if( (annotationValues = method.getAnnotation( "de.inetsoftware.jwebassembly.api.annotation.ExportStatic" )) != null ) {
+                if( !method.isStatic() ) {
+                    // functions.markAsStatic( name );
+                    throw new WasmException( "Export method must be static: " + name.fullName, -1 );
+                }
+                functions.markAsNeeded( name );
+                functions.markAsStatic( name );
                 return;
             }
         } catch( Exception ioex ) {
@@ -642,6 +651,14 @@ public class ModuleGenerator {
      */
     private void writeExport( FunctionName name, MethodInfo method ) throws IOException {
         Map<String,Object> export = method.getAnnotation( JWebAssembly.EXPORT_ANNOTATION );
+        if( export != null ) {
+            String exportName = (String)export.get( "name" );
+            if( exportName == null ) {
+                exportName = method.getName();  // TODO naming conversion rule if no name was set
+            }
+            writer.writeExport( name, exportName );
+        }
+        export = method.getAnnotation( "de.inetsoftware.jwebassembly.api.annotation.ExportStatic" );
         if( export != null ) {
             String exportName = (String)export.get( "name" );
             if( exportName == null ) {
